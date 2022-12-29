@@ -3,6 +3,7 @@ const URL = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/
 // Top N results to be displayed in the plots (TOP)
 const TOP = 10;
 
+// Variables that will keep the information extracted from the JSON
 var names = [];
 var metadata = [];
 var samples = [];
@@ -16,15 +17,24 @@ function init() {
     metadata = data.metadata;
     samples = data.samples;
 
+    // Adding the subject ID name to the dropdown element "#selDataset"
     names.forEach((name) => {
       selDataset.append("option")
                 .text(name)
                 .property("value", name);
     });  
 
+    setSubjectIdTitle(names[0]);
     getDemographicInfo(names[0]);
     prepareCharts(names[0]);
   });
+}
+
+function setSubjectIdTitle(id) {
+  var subjectIdTitle = d3.select("#subject-id-title");
+  // Initially, clear any existing metadata in the div panel element "subject-id-title"
+  subjectIdTitle.html("");
+  subjectIdTitle.append("h2").text(`Information for Subject ID ${id}`);
 }
 
 // Function to display each key-value pair from the metadata JSON object.
@@ -48,6 +58,11 @@ function getDemographicInfo(id) {
   }
 }
 
+// Function that prepares and loads all 3 different plots that ara available in this page:
+// 1) Fetch for the data for the captioned Sample ID
+// 2) Prepare Bar Chart, runing the slice of N samples and reversing
+// 3) Prepare the Bubble Chart, setting up the size of the bubble according to the number of samples
+// 4) Prepare the Gauge Chart, fetching the number of Washing Frequency from the Metadata array.
 function prepareCharts(id) {
   
   // Filtering to fetch the required data from the samples array of JSON object
@@ -140,12 +155,18 @@ function prepareCharts(id) {
 
     }];
     
-    var layout = { margin: { t: 0, b: 0 } };
-    Plotly.newPlot('gauge', traceGaugeChart, layout);
+    // Creating the Layout for the Gauge Chart. 
+    var traceGaugeLayout = { margin: { t: 0, b: 0 } };
+    
+    // Ploting the Gauge Chart
+    Plotly.newPlot('gauge', traceGaugeChart, traceGaugeLayout);
   }
 }
 
+// Function that triggers the different internal functions to refresh the information in the page
+// This is based on the captioned ID from the selected option
 function optionChanged(id) {
+  setSubjectIdTitle(id);
   getDemographicInfo(id);
   prepareCharts(id);
 }
